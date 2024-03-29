@@ -1,0 +1,50 @@
+interface LocalStorageItem {
+    value: any;
+    expiredAt?: number;
+}
+
+export const handleLocalStorage = {
+    /**
+     * 设置localStorage
+     * @param {string} key 键name
+     * @param {*} value 值
+     * @param {*} expiredAt 过期时间，如：1分钟 = 60 * 1000
+     */
+    set(key: string, value: any, expiredAt?: number) {
+        const item: LocalStorageItem = {
+            value
+        };
+
+        if (expiredAt) {
+            item.expiredAt = new Date().getTime() + expiredAt;
+        }
+
+        localStorage.setItem(key, JSON.stringify(item));
+    },
+
+    /**
+     * 获取localStorage
+     * @param {string} key 键name
+     * @returns {*}
+     */
+    get(key: string) {
+        const itemString = localStorage.getItem(key);
+        if (!itemString) {
+            return null;
+        }
+        const item: LocalStorageItem = JSON.parse(itemString);
+        if (item.expiredAt && new Date().getTime() > item.expiredAt) {
+            localStorage.removeItem(key);
+            return null;
+        }
+        return item.value;
+    },
+
+    /**
+     * 删除localStorage
+     * @param {string} key 键name
+     */
+    remove(key: string) {
+        localStorage.removeItem(key);
+    }
+};
